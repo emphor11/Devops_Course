@@ -5,7 +5,7 @@ provider "aws" {
 # 1. Create S3 Bucket
 resource "aws_s3_bucket" "bucket" {
   # Bucket names must be globally unique
-  bucket = "dakshyadav-devops-s3-bucket" 
+  bucket = "dakshyadav-devops-s3-bucket"
 }
 
 # 2. Enable Versioning

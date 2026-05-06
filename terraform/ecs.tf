@@ -55,7 +55,7 @@ resource "aws_ecs_task_definition" "app" {
 
   container_definitions = jsonencode([
     {
-      name      = "simple-api-container"
+      name = "simple-api-container"
       # Note: This is the URL of the ECR image we pushed in Step 7
       image     = "711402355499.dkr.ecr.us-east-1.amazonaws.com/simple-api:latest"
       essential = true

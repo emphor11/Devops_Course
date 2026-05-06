@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Simple API Dashboard</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="status-panel">
+        <div>
+          <p class="eyebrow">DevOps Assignment</p>
+          <h1>Simple API Dashboard</h1>
+          <p class="summary">Live health data from the Express service deployed through GitHub Actions, Terraform, ECR, and ECS Fargate.</p>
+        </div>
+        <div class="status-card" aria-live="polite">
+          <span class="status-dot" id="status-dot"></span>
+          <div>
+            <p class="label">Service status</p>
+            <p class="value" id="status-value">Checking</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="details-grid">
+        <article>
+          <p class="label">Message</p>
+          <p id="message">Waiting for API response</p>
+        </article>
+        <article>
+          <p class="label">Timestamp</p>
+          <p id="timestamp">-</p>
+        </article>
+        <article>
+          <p class="label">Pipeline</p>
+          <p>Test, lint, Terraform, Docker build, ECR push, ECS deploy</p>
+        </article>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

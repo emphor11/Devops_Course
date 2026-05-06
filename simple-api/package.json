@@ -5,13 +5,21 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "jest"
+    "test": "jest",
+    "test:ci": "jest --ci --reporters=default --reporters=jest-junit",
+    "lint": "eslint ."
+  },
+  "jest-junit": {
+    "outputDirectory": "reports",
+    "outputName": "junit.xml"
   },
   "dependencies": {
     "express": "^4.19.2"
   },
   "devDependencies": {
+    "eslint": "^9.39.4",
     "jest": "^30.3.0",
+    "jest-junit": "^17.0.0",
     "supertest": "^7.2.2"
   }
 }

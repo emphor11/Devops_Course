@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 env:
@@ -30,12 +33,24 @@ jobs:
         working-directory: ./simple-api
         run: npm ci
 
+      - name: Run linter
+        working-directory: ./simple-api
+        run: npm run lint
+
       - name: Run tests
         working-directory: ./simple-api
-        run: npm test
+        run: npm run test:ci
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jest-junit-report
+          path: simple-api/reports/junit.xml
 
       # Configure AWS credentials for the following steps
       - name: Configure AWS credentials
+        if: github.event_name != 'pull_request'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -45,13 +60,21 @@ jobs:
 
       # 2. Terraform apply (Infra creation/updates)
       - name: Setup Terraform
+        if: github.event_name != 'pull_request'
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
+        if: github.event_name != 'pull_request'
         working-directory: ./terraform
         run: terraform init
 
+      - name: Terraform Validate
+        if: github.event_name != 'pull_request'
+        working-directory: ./terraform
+        run: terraform validate
+
       - name: Import existing Terraform resources
+        if: github.event_name != 'pull_request'
         working-directory: ./terraform
         run: |
           terraform state show aws_s3_bucket.bucket >/dev/null 2>&1 || terraform import aws_s3_bucket.bucket dakshyadav-devops-s3-bucket || true
@@ -72,17 +95,25 @@ jobs:
             terraform state show aws_ecs_service.main >/dev/null 2>&1 || terraform import aws_ecs_service.main "$ECS_CLUSTER/$ECS_SERVICE" || true
           fi
 
-      - name: Terraform Apply
+      - name: Terraform Plan
+        if: github.event_name != 'pull_request'
         working-directory: ./terraform
-        run: terraform apply -auto-approve
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        if: github.event_name != 'pull_request'
+        working-directory: ./terraform
+        run: terraform apply -auto-approve tfplan
 
       # 3. Login to ECR
       - name: Login to Amazon ECR
+        if: github.event_name != 'pull_request'
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
       # 4. Build, tag, and push Docker image to ECR
       - name: Build and push Docker image
+        if: github.event_name != 'pull_request'
         working-directory: ./simple-api
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -93,8 +124,12 @@ jobs:
 
       # 5. Deploy to ECS
       - name: Deploy to Amazon ECS
+        if: github.event_name != 'pull_request'
         run: |
           aws ecs update-service \
             --cluster $ECS_CLUSTER \
             --service $ECS_SERVICE \
             --force-new-deployment
+          aws ecs wait services-stable \
+            --cluster $ECS_CLUSTER \
+            --services $ECS_SERVICE

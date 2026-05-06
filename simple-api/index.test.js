@@ -8,9 +8,9 @@ describe('API Routes', () => {
     expect(response.body).toHaveProperty('status', 'success');
   });
 
-  test('GET / should return welcome message', async () => {
+  test('GET / should return frontend page', async () => {
     const response = await request(app).get('/');
     expect(response.status).toBe(200);
-    expect(response.text).toContain('Welcome to the Simple API');
+    expect(response.text).toContain('Simple API Dashboard');
   });
 });
